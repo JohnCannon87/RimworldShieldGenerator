@@ -18,19 +18,25 @@ namespace RimworldShieldGenerator
         private Area selectedArea;
         private string selectedAreaLabel;
         private Building_GravEngine cachedGravship;
-        private Color shieldColor = new Color(0, 0.5f, 0.5f, 0.35f);
 
         private int shieldActiveTimer;
         private const int shieldDelayTicks = 2000;
 
         private Mesh cubeMesh;
-        private Material material;
 
         private bool dirtyMesh = true;
         private List<Mesh> meshes = new List<Mesh>();
         private readonly float shieldThickness = 0.5f;
 
         public static readonly SoundDef HitSoundDef = SoundDef.Named("WallShield_Hit");
+
+        private static readonly Vector3[] CardinalDirs3D =
+        {
+            new Vector3(1f, 0f, 0f),   // East
+            new Vector3(-1f, 0f, 0f),  // West
+            new Vector3(0f, 0f, 1f),   // North
+            new Vector3(0f, 0f, -1f),  // South
+        };
 
         // ---------- Core Lifecycle ----------
 
@@ -108,12 +114,11 @@ namespace RimworldShieldGenerator
                     return;
                 }
 
-                if (cubeMesh == null || material == null)
+                if (cubeMesh == null)
                 {
                     cubeMesh = GraphicsUtil.CreateCuboidMesh();
-                    material = SolidColorMaterials.NewSolidColorMaterial(shieldColor, ShaderDatabase.MetaOverlay);
 
-                    Logger.Warning($"PostDraw: cubeMesh or material were null (cubeMesh={cubeMesh != null}, material={material != null})");
+                    Logger.Warning($"PostDraw: cubeMesh or material were null (cubeMesh={cubeMesh != null})");
                     return;
                 }
 
@@ -122,7 +127,7 @@ namespace RimworldShieldGenerator
                 if (IsActive())
                 {
                     Logger.Message($"[{parent}] Drawing shield ({shieldedCells.Count} cells).");
-                    DrawShield();
+                    ShieldDrawer.DrawShield(shieldedCells, parent);
                 }
             }
             catch (Exception ex)
@@ -398,44 +403,8 @@ namespace RimworldShieldGenerator
 
 
 
-        // ---------- Drawing ----------
+        
 
-        private void DrawShield()
-        {
-            if (cubeMesh == null)
-                cubeMesh = GraphicsUtil.CreateCuboidMesh();
-
-            if (material == null)
-                material = SolidColorMaterials.NewSolidColorMaterial(shieldColor, ShaderDatabase.MetaOverlay);
-
-            if (shieldedCells.NullOrEmpty())
-                return;
-
-            foreach (var cell in shieldedCells)
-                DrawShieldSegment(cell);
-        }
-
-        private void DrawShieldSegment(IntVec3 cell)
-        {
-            try
-            {
-                if (cubeMesh == null || material == null)
-                {
-                    Logger.Warning($"DrawShieldSegment: cubeMesh or material is null! (cubeMesh={cubeMesh != null}, material={material != null})");
-                    return;
-                }
-
-                Vector3 center = cell.ToVector3Shifted();
-                Vector3 scale = new Vector3(shieldThickness, 1f, shieldThickness);
-                Matrix4x4 matrix = Matrix4x4.TRS(center, Quaternion.identity, scale);
-                Graphics.DrawMesh(cubeMesh, matrix, material, 0);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error($"DrawShieldSegment exception: {ex}");
-                throw;
-            }
-        }
 
         // ---------- UI + Saving ----------
 

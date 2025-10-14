@@ -93,6 +93,7 @@
     <Compile Include="RimworldShieldGenerator\RimworldShieldGeneratorMod.cs" />
     <Compile Include="RimworldShieldGenerator\RimworldShieldGeneratorSettings.cs" />
     <Compile Include="RimworldShieldGenerator\RimworldShieldGenerator_Initializer.cs" />
+    <Compile Include="RimworldShieldGenerator\ShieldDrawer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
