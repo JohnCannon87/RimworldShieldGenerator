@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+        <name>Shield Generator</name>
+        <author>Arcjc007</author>
+        <packageId>Arcjc007.ShieldGenerator</packageId>
+        <supportedVersions>
+                <li>1.6</li>
+        </supportedVersions>
+        <description><![CDATA[Adds a shield generator that can either shield a defined area, or if placed in a Gravship can shield the outer edge of the Gravship automatically.
+        ]]></description>
+</ModMetaData>

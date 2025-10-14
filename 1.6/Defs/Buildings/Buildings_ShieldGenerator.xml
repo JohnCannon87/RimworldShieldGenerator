@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+    <ThingDef ParentName="BuildingBase">
+        <defName>ShieldGenerator</defName>
+        <label>shield generator</label>
+        <description>A small wall mounted shield unit.</description>
+        <graphicData>
+            <texPath>Things/Building/GravshipShieldGenerator</texPath>
+            <graphicClass>Graphic_Single</graphicClass>
+            <drawSize>(1,1)</drawSize>
+        </graphicData>
+        <thingCategories>
+            <li>BuildingsSecurity</li>
+        </thingCategories>
+        <costList>
+            <Gold>250</Gold>
+            <Plasteel>200</Plasteel>
+            <Silver>200</Silver>
+            <ComponentSpacer>15</ComponentSpacer>
+        </costList>
+        <building>
+            <isEdifice>true</isEdifice>
+        </building>
+        <statBases>
+            <WorkToBuild>3000</WorkToBuild>
+            <MaxHitPoints>1000</MaxHitPoints>
+            <Flammability>1.0</Flammability>
+            <Mass>35</Mass>
+        </statBases>
+        <tickerType>Normal</tickerType>
+        <researchPrerequisites>
+            <li>ShieldBelt</li>
+        </researchPrerequisites>
+        <drawOffscreen>true</drawOffscreen>
+        <seeThroughFog>true</seeThroughFog>
+        <drawerType>MapMeshAndRealTime</drawerType>
+        <comps>
+            <li Class="CompProperties_Power">
+                <compClass>CompPowerTrader</compClass>
+                <basePowerConsumption>1</basePowerConsumption>
+            </li>
+            <li Class="CompProperties_Breakdownable"/>
+            <li Class="CompProperties_Flickable"/>
+            <li Class="RimworldShieldGenerator.CompProperties_DynamicShieldEmitter"/>
+        </comps>
+        <placeWorkers>
+        </placeWorkers>
+        <designationCategory>Security</designationCategory>
+        <constructionSkillPrerequisite>18</constructionSkillPrerequisite>
+        <clearBuildingArea>true</clearBuildingArea>
+        <drawPlaceWorkersWhileSelected>true</drawPlaceWorkersWhileSelected>
+        <altitudeLayer>PawnUnused</altitudeLayer>
+        <castEdgeShadows>false</castEdgeShadows>
+        <minifiedDef>MinifiedThing</minifiedDef>
+    <passability>PassThroughOnly</passability>
+    </ThingDef>
+
+</Defs>
