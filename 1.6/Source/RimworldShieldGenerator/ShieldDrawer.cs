@@ -4,24 +4,30 @@ using System.Linq;
 using UnityEngine;
 using Verse;
 using RimWorld;
-using Verse.Sound;
-using System.Reflection;
 
 namespace RimworldShieldGenerator
 {
     class ShieldDrawer
     {
-        private static Material material;
-        private static Color shieldColor = new Color(0, 0.5f, 0.5f, 0.35f);
+        private static Material borderMaterial;
+        private static Material pulseMaterial;
 
-        // ---------- Drawing ----------
+        private static readonly Color borderColor = new Color(0.0f, 0.25f, 0.65f, 0.35f);
+        private static readonly Color pulseBaseColor = new Color(0.2f, 0.45f, 0.85f, 1.00f);
+
+        private static Mesh cachedShieldMesh;
+        private static int cachedCellCount;
+        private static int lastMapHash;
+
         public static void DrawShield(List<IntVec3> shieldedCells, ThingWithComps parent)
         {
-            if (material == null)
-                material = SolidColorMaterials.NewSolidColorMaterial(shieldColor, ShaderDatabase.MetaOverlay);
+            if (shieldedCells.NullOrEmpty()) return;
 
-            if (shieldedCells.NullOrEmpty())
-                return;
+            if (borderMaterial == null)
+                borderMaterial = SolidColorMaterials.NewSolidColorMaterial(borderColor, ShaderDatabase.MetaOverlay);
+
+            if (pulseMaterial == null)
+                pulseMaterial = SolidColorMaterials.NewSolidColorMaterial(pulseBaseColor, ShaderDatabase.MoteGlow);
 
             Map map = parent.Map;
             HashSet<IntVec3> shieldSet = new HashSet<IntVec3>(shieldedCells);
@@ -57,8 +63,8 @@ namespace RimworldShieldGenerator
             }
 
             // --- 2️⃣ Collect outer edges ---
-            List<EdgeSegment> horizEdges = new List<EdgeSegment>(); // east-west edges (facing north/south)
-            List<EdgeSegment> vertEdges = new List<EdgeSegment>();  // north-south edges (facing east/west)
+            List<EdgeSegment> horizEdges = new List<EdgeSegment>();
+            List<EdgeSegment> vertEdges = new List<EdgeSegment>();
 
             foreach (IntVec3 cell in shieldedCells)
             {
@@ -82,11 +88,105 @@ namespace RimworldShieldGenerator
                 }
             }
 
-            // --- 3️⃣ Merge and draw continuous runs ---
+            // --- 3️⃣ Draw single pulsing sheet covering the entire shielded area ---
+            DrawUnifiedPulse(shieldedCells, map, parent);
+
+            // --- 4️⃣ Draw the shield outline ---
             MergeAndDrawEdges(horizEdges, true);
             MergeAndDrawEdges(vertEdges, false);
         }
-                private struct EdgeSegment
+
+        // Draw unified pulsing field covering the full enclosed shield area
+        private static void DrawUnifiedPulse(List<IntVec3> shieldedCells, Map map, ThingWithComps parent)
+        {
+            // --- Step 1️⃣: Identify all cells enclosed by the shield ---
+            HashSet<IntVec3> shieldSet = new HashSet<IntVec3>(shieldedCells);
+            HashSet<IntVec3> inside = new HashSet<IntVec3>();
+
+            // Flood fill from parent position to find interior cells
+            Queue<IntVec3> open = new Queue<IntVec3>();
+            IntVec3 origin = parent.Position;
+            if (origin.InBounds(map) && !shieldSet.Contains(origin))
+                open.Enqueue(origin);
+
+            while (open.Count > 0)
+            {
+                IntVec3 c = open.Dequeue();
+                if (!c.InBounds(map) || inside.Contains(c) || shieldSet.Contains(c))
+                    continue;
+
+                inside.Add(c);
+
+                for (int i = 0; i < 4; i++)
+                {
+                    IntVec3 n = c + GenAdj.CardinalDirections[i];
+                    if (n.InBounds(map) && !shieldSet.Contains(n) && !inside.Contains(n))
+                        open.Enqueue(n);
+                }
+            }
+
+            // Merge inside and shieldedCells together for pulsing region
+            inside.UnionWith(shieldedCells);
+            var allCells = inside.ToList();
+
+            // --- Step 2️⃣: Cache or rebuild the pulse mesh ---
+            if (cachedShieldMesh == null || cachedCellCount != allCells.Count || lastMapHash != map.GetHashCode())
+            {
+                cachedShieldMesh = new Mesh();
+                cachedCellCount = allCells.Count;
+                lastMapHash = map.GetHashCode();
+
+                List<Vector3> verts = new List<Vector3>();
+                List<int> tris = new List<int>();
+                List<Vector2> uvs = new List<Vector2>();
+
+                int vertIndex = 0;
+                foreach (IntVec3 cell in allCells)
+                {
+                    float x = cell.x;
+                    float z = cell.z;
+
+                    verts.Add(new Vector3(x, 0f, z));
+                    verts.Add(new Vector3(x + 1f, 0f, z));
+                    verts.Add(new Vector3(x + 1f, 0f, z + 1f));
+                    verts.Add(new Vector3(x, 0f, z + 1f));
+
+                    uvs.Add(new Vector2(0, 0));
+                    uvs.Add(new Vector2(1, 0));
+                    uvs.Add(new Vector2(1, 1));
+                    uvs.Add(new Vector2(0, 1));
+
+                    tris.Add(vertIndex);
+                    tris.Add(vertIndex + 2);
+                    tris.Add(vertIndex + 1);
+                    tris.Add(vertIndex);
+                    tris.Add(vertIndex + 3);
+                    tris.Add(vertIndex + 2);
+
+                    vertIndex += 4;
+                }
+
+                cachedShieldMesh.SetVertices(verts);
+                cachedShieldMesh.SetTriangles(tris, 0);
+                cachedShieldMesh.SetUVs(0, uvs);
+                cachedShieldMesh.RecalculateNormals();
+                cachedShieldMesh.RecalculateBounds();
+            }
+
+            // --- Step 3️⃣: Draw a single pulsing overlay for the full enclosed area ---
+            float pulse = 0.85f + 0.15f * Mathf.Sin(Time.realtimeSinceStartup * 0.9f);
+            Color color = new Color(0.2f, 0.45f, 0.85f, 0.045f * pulse);
+
+            MaterialPropertyBlock mpb = new MaterialPropertyBlock();
+            mpb.SetColor(ShaderPropertyIDs.Color, color);
+
+            Vector3 pos = new Vector3(0f, AltitudeLayer.MoteOverhead.AltitudeFor() + 0.001f, 0f);
+            Matrix4x4 matrix = Matrix4x4.TRS(pos, Quaternion.identity, Vector3.one);
+
+            Graphics.DrawMesh(cachedShieldMesh, matrix, pulseMaterial, 0, null, 0, mpb);
+        }
+
+        private struct EdgeSegment
         {
             public IntVec3 Cell;
             public IntVec3 Dir;
@@ -97,18 +197,14 @@ namespace RimworldShieldGenerator
                 Dir = d;
             }
 
-            public override int GetHashCode()
-            {
-                return Cell.GetHashCode() ^ Dir.GetHashCode();
-            }
-
+            public override int GetHashCode() => Cell.GetHashCode() ^ Dir.GetHashCode();
             public override bool Equals(object obj)
             {
-                if (!(obj is EdgeSegment)) return false;
-                EdgeSegment other = (EdgeSegment)obj;
-                return Cell.Equals(other.Cell) && Dir.Equals(other.Dir);
+                if (!(obj is EdgeSegment o)) return false;
+                return Cell.Equals(o.Cell) && Dir.Equals(o.Dir);
             }
         }
+
         private static void MergeAndDrawEdges(List<EdgeSegment> edges, bool horizontal)
         {
             if (edges.Count == 0)
@@ -125,7 +221,6 @@ namespace RimworldShieldGenerator
                 IntVec3 start = e.Cell;
                 IntVec3 end = e.Cell;
 
-                // Extend line in both directions
                 while (true)
                 {
                     IntVec3 next = end + step;
@@ -150,6 +245,7 @@ namespace RimworldShieldGenerator
                 DrawShieldLine(start, end, horizontal, e.Dir);
             }
         }
+
         private static void DrawShieldLine(IntVec3 start, IntVec3 end, bool horizontal, IntVec3 dir)
         {
             Vector3 mid = (start.ToVector3Shifted() + end.ToVector3Shifted()) / 2f;
@@ -164,7 +260,7 @@ namespace RimworldShieldGenerator
                 : new Vector3(thickness, 1f, length);
 
             Matrix4x4 matrix = Matrix4x4.TRS(pos, Quaternion.identity, scale);
-            Graphics.DrawMesh(MeshPool.plane10, matrix, material, 0);
+            Graphics.DrawMesh(MeshPool.plane10, matrix, borderMaterial, 0);
         }
     }
 }

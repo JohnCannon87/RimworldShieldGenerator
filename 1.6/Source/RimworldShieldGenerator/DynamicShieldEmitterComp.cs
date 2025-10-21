@@ -24,10 +24,6 @@ namespace RimworldShieldGenerator
 
         private Mesh cubeMesh;
 
-        private bool dirtyMesh = true;
-        private List<Mesh> meshes = new List<Mesh>();
-        private readonly float shieldThickness = 0.5f;
-
         public static readonly SoundDef HitSoundDef = SoundDef.Named("WallShield_Hit");
 
         private static readonly Vector3[] CardinalDirs3D =
@@ -280,7 +276,6 @@ namespace RimworldShieldGenerator
                 return;
             }
 
-            dirtyMesh = true;
             shieldedCells = selectedArea.ActiveCells.ToList();
             Logger.Message($"GenerateAreaShieldCells -> {shieldedCells.Count} cells");
         }
@@ -329,7 +324,7 @@ namespace RimworldShieldGenerator
                 }
 
                 // Slightly expand outward for shield thickness (1 cell out from the hull)
-                var expanded = new HashSet<IntVec3>(border);
+                /*var expanded = new HashSet<IntVec3>(border);
                 foreach (var cell in border)
                 {
                     foreach (var dir in directions)
@@ -338,12 +333,12 @@ namespace RimworldShieldGenerator
                         if (neighbor.InBounds(map) && !hull.Contains(neighbor))
                             expanded.Add(neighbor);
                     }
-                }
+                }*/
 
                 // Filter out any cells that overlap the substructure or are inside it
-                expanded.RemoveWhere(c => hull.Contains(c));
+                border.RemoveWhere(c => hull.Contains(c));
 
-                shieldedCells = expanded.ToList();
+                shieldedCells = border.ToList();
                 Logger.Message($"[{parent}] Generated hull-following outer shield with {shieldedCells.Count} cells.");
             }
             catch (Exception ex)
