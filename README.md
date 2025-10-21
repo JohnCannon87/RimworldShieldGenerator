@@ -5,6 +5,7 @@ This mod adds a wall mounted shield generator for Gravships.
 [list]
 [*]Shield protects from all "projectiles", won't defend from Graser Beams etc.
 [*]Drains battery power whenever it defends a shot
+[*]Shield shatters on a shot that fully drains the battery, leaving it to cool down and making a large EMP explosion in the room with the shield
 [*]Shield comes on automatically when a threat is detected on the map
 [*]Change your shield colour and transparency ! (The edge will always be visible but you can remove the inner overlay if you wish)
 [/list]
