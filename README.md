@@ -1,19 +1,17 @@
 [h2]RimworldShieldGenerator[/h2]
-This mod adds a long range turret to the game.
+This mod adds a wall mounted shield generator for Gravships.
 
 [h3]Features[/h3]
 [list]
-[*]Turret fires 1 high powered beam, over walls and roofs but NOT over "thick roofs" (Simulating that it's ontop of a building for the turret but that it's not high over a mountain etc.)
-[*]Charging animation before firing
-[*]Requires battery power to fire, no ammunition but make sure you have enough power !
-[*]Lots of values for the turret configurable in settings to tune to how balanced you want it to be
-[*]Intercept incoming mortar shells and rockets (also configurable in the mod settings)
-[*]Counts as a wall, both for Gravship reasons (It's airtight !) and for mounting things to it e.g. Wall Lights etc.
+[*]Shield protects from all "projectiles", won't defend from Graser Beams etc.
+[*]Drains battery power whenever it defends a shot
+[*]Shield comes on automatically when a threat is detected on the map
+[*]Change your shield colour and transparency ! (The edge will always be visible but you can remove the inner overlay if you wish)
 [/list]
 
 
 [h3]Mod Compatibility[/h3]
-The interception logic is the main thing that will need to be integrated, for now it will intercept anything hostile that has the "flyOverhead" value (which should be all modded shells) and any projectile with the word "rocket" or "missile" in the name, which will hopefully catch a lot of other things.
+Almost certainly isn't CE compatible and won't ever be sorry !
 
 [h3]Known Issues[/h3]
 [list]
@@ -26,7 +24,7 @@ Part of a series of mods I've had for myself for a while that have either terrib
 
 [h2]Future Plans[/h2]
 [list]
-[*]None, this is complete for me so probably won't be adding anything unless someone gives me a really good idea.
+[*]Try and get the shield to also block lasers
 [/list]
 
 [h2]Source Code[/h2]

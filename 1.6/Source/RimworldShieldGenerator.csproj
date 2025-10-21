@@ -90,6 +90,7 @@
     <Compile Include="RimworldShieldGenerator\DynamicShieldEmitterComp.cs" />
     <Compile Include="RimworldShieldGenerator\GraphicsUtil.cs" />
     <Compile Include="RimworldShieldGenerator\Logger.cs" />
+    <Compile Include="RimworldShieldGenerator\PlaceWorker_OneShieldPerMap.cs" />
     <Compile Include="RimworldShieldGenerator\RimworldShieldGeneratorDefOf.cs" />
     <Compile Include="RimworldShieldGenerator\RimworldShieldGeneratorMod.cs" />
     <Compile Include="RimworldShieldGenerator\RimworldShieldGeneratorSettings.cs" />

@@ -1,0 +1,19 @@
+<Defs>
+
+    <SoundDef>
+        <defName>ArcShield_Hit</defName>
+        <context>MapOnly</context>
+        <maxSimultaneous>3</maxSimultaneous>
+        <subSounds>
+            <li>
+                <grains>
+                    <li Class="AudioGrain_Clip">
+                        <clipPath>ShieldHit</clipPath>
+                    </li>
+                </grains>
+                <volumeRange>30~30</volumeRange>
+            </li>
+        </subSounds>
+    </SoundDef>
+
+</Defs>

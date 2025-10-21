@@ -20,7 +20,7 @@ namespace RimworldShieldGenerator
 
         private Mesh cubeMesh;
 
-        public static readonly SoundDef HitSoundDef = SoundDef.Named("WallShield_Hit");
+        public static readonly SoundDef HitSoundDef = SoundDef.Named("ArcShield_Hit");
         private static readonly Vector3[] CardinalDirs3D =
         {
             new Vector3(1f, 0f, 0f),   // East

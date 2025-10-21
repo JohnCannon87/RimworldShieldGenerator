@@ -5,29 +5,57 @@
         <defName>ShieldGenerator</defName>
         <label>shield generator</label>
         <description>A small wall mounted shield unit.</description>
+        <rotatable>true</rotatable>
         <graphicData>
-            <texPath>Things/Building/GravshipShieldGenerator</texPath>
-            <graphicClass>Graphic_Single</graphicClass>
-            <drawSize>(1,1)</drawSize>
+            <texPath>Buildings/WallShieldGen/WallShieldGen</texPath>
+            <graphicClass>Graphic_Multi</graphicClass>
+            <drawOffsetNorth>(0,0,0.9)</drawOffsetNorth>
+            <drawOffsetSouth>(0,0,-0.9)</drawOffsetSouth>
+            <drawOffsetWest>(-0.9,0,0)</drawOffsetWest>
+            <drawOffsetEast>(0.9,0,0)</drawOffsetEast>
+            <damageData>
+                <enabled>false</enabled>
+            </damageData>
         </graphicData>
-        <thingCategories>
-            <li>BuildingsSecurity</li>
-        </thingCategories>
+        <uiIconPath>Buildings/WallShieldGen/WallShieldGen_MenuIcon</uiIconPath>
+        <altitudeLayer>BuildingOnTop</altitudeLayer>
         <costList>
-            <Gold>250</Gold>
+            <Uranium>250</Uranium>
             <Plasteel>200</Plasteel>
-            <Silver>200</Silver>
-            <ComponentSpacer>15</ComponentSpacer>
+            <BroadshieldCore>5</BroadshieldCore>
+            <ComponentSpacer>10</ComponentSpacer>
         </costList>
-        <building>
-            <isEdifice>true</isEdifice>
-        </building>
         <statBases>
             <WorkToBuild>3000</WorkToBuild>
             <MaxHitPoints>1000</MaxHitPoints>
             <Flammability>1.0</Flammability>
             <Mass>35</Mass>
         </statBases>
+        <passability>Standable</passability>
+        <pathCost>0</pathCost>
+        <overrideMinifiedRot>North</overrideMinifiedRot>
+        <minifiedDrawOffset>(0, 0, 0.2)</minifiedDrawOffset>
+        <building>
+            <isEdifice>false</isEdifice>
+            <isAttachment>true</isAttachment>
+        </building>
+        <placeWorkers>
+            <li>Placeworker_AttachedToWall</li>
+            <li>RimworldShieldGenerator.PlaceWorker_OneShieldPerMap</li>
+        </placeWorkers>
+        <comps>
+            <li Class="CompProperties_Power">
+                <compClass>CompPowerTrader</compClass>
+                <basePowerConsumption>-100</basePowerConsumption>
+            </li>
+            <li Class="CompProperties_Breakdownable"/>
+            <li Class="CompProperties_Flickable"/>
+            <li Class="RimworldShieldGenerator.CompProperties_DynamicShieldEmitter"/>
+        </comps>
+
+        <thingCategories>
+            <li>BuildingsSecurity</li>
+        </thingCategories>        
         <tickerType>Normal</tickerType>
         <researchPrerequisites>
             <li>ShieldBelt</li>
@@ -35,25 +63,18 @@
         <drawOffscreen>true</drawOffscreen>
         <seeThroughFog>true</seeThroughFog>
         <drawerType>MapMeshAndRealTime</drawerType>
-        <comps>
-            <li Class="CompProperties_Power">
-                <compClass>CompPowerTrader</compClass>
-                <basePowerConsumption>1</basePowerConsumption>
-            </li>
-            <li Class="CompProperties_Breakdownable"/>
-            <li Class="CompProperties_Flickable"/>
-            <li Class="RimworldShieldGenerator.CompProperties_DynamicShieldEmitter"/>
-        </comps>
-        <placeWorkers>
-        </placeWorkers>
-        <designationCategory>Security</designationCategory>
+        
+        <tradeTags>
+            <li>GravshipUpgrade</li>
+        </tradeTags>
+        
+        <terrainAffordanceNeeded>Substructure</terrainAffordanceNeeded>
+        <designationCategory>Odyssey</designationCategory>
         <constructionSkillPrerequisite>18</constructionSkillPrerequisite>
-        <clearBuildingArea>true</clearBuildingArea>
+        <clearBuildingArea>false</clearBuildingArea>
         <drawPlaceWorkersWhileSelected>true</drawPlaceWorkersWhileSelected>
-        <altitudeLayer>PawnUnused</altitudeLayer>
         <castEdgeShadows>false</castEdgeShadows>
         <minifiedDef>MinifiedThing</minifiedDef>
-    <passability>PassThroughOnly</passability>
     </ThingDef>
 
 </Defs>
