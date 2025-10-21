@@ -34,8 +34,11 @@ namespace RimworldShieldGenerator
             list.CheckboxLabeled("Enable Debug Logging", ref settings.enableDebugLogging);
             list.Gap(10f);
 
-            DrawIntSetting(list, "Shield Power Per Cell", ref settings.shieldPowerPerCell, 1, 100);
-           
+            DrawFloatSetting(list, "Shield Intercept Base Cost", ref settings.shieldInterceptCostWd, 0.1f, 100f);
+            DrawIntSetting(list, "Percentage Of Damage Drained", ref settings.percentageOfDamageDrained, 0, 100);
+            DrawIntSetting(list, "Shield Active Power", ref settings.shieldIdleWatts, 1, 10000);
+            DrawIntSetting(list, "Shield Cooldown Ticks, 0 disables breaking feature, Roughly 60 ticks to 1 second", ref settings.shieldCooldownTicks, 0, 5000);
+
             list.End();
             Widgets.EndScrollView();
 
