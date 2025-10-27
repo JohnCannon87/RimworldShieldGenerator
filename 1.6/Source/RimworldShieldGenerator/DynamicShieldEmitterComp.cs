@@ -17,6 +17,9 @@ namespace RimworldShieldGenerator
         private const int shieldDelayTicks = 2000;
         private int shieldCooldownTicksRemaining;
         private bool IsOnCooldown => shieldCooldownTicksRemaining > 0;
+        private int nextShieldRefreshTick;
+        private bool manualOverrideEnabled = false;
+        private bool manualShieldActive = false;
 
         private Mesh cubeMesh;
 
@@ -108,6 +111,13 @@ namespace RimworldShieldGenerator
             if (shieldActiveTimer <= shieldDelayTicks)
                 shieldActiveTimer++;
 
+            // Periodic refresh every 1200 ticks (~20 seconds)
+            if (Find.TickManager.TicksGame >= nextShieldRefreshTick)
+            {
+                nextShieldRefreshTick = Find.TickManager.TicksGame + 1200;
+                RefreshShieldCells();
+            }
+
             ShieldProjectiles();
             ApplyIdlePower();
         }
@@ -181,7 +191,16 @@ namespace RimworldShieldGenerator
             if (IsOnCooldown)
                 return false;
 
-            bool active = parent.Spawned && PowerOn && IsThreatPresent();
+            if (!PowerOn)
+                return false;
+
+            if (manualOverrideEnabled)
+            {
+                // Manual override always wins
+                return manualShieldActive;
+            }
+
+            bool active = parent.Spawned && IsThreatPresent();
 
             if (active)
                 shieldActiveTimer = 0;
@@ -510,7 +529,7 @@ namespace RimworldShieldGenerator
 
         public override IEnumerable<Gizmo> CompGetGizmosExtra()
         {
-            // 🎨 Color picker gizmo only
+            // 🎨 Color picker
             yield return new Command_Action
             {
                 defaultLabel = "Change Shield Color",
@@ -518,13 +537,48 @@ namespace RimworldShieldGenerator
                 action = OpenColorPicker,
                 defaultDesc = "Change the color of this shield's visual effect."
             };
+
+            // ⚙️ Manual override toggle
+            yield return new Command_Toggle
+            {
+                defaultLabel = "Manual Override",
+                defaultDesc = "Enable or disable manual control of the shield. When enabled, automatic threat detection is ignored.",
+                icon = ContentFinder<Texture2D>.Get("UI/Commands/ChangeColor", true),
+                isActive = () => manualOverrideEnabled,
+                toggleAction = () =>
+                {
+                    manualOverrideEnabled = !manualOverrideEnabled;
+                }
+            };
+
+            // 🛡️ Manual shield control (only visible when override is enabled)
+            if (manualOverrideEnabled)
+            {
+                yield return new Command_Toggle
+                {
+                    defaultLabel = manualShieldActive ? "Deactivate Shield" : "Activate Shield",
+                    defaultDesc = manualShieldActive
+                        ? "Manually turn the shield off."
+                        : "Manually activate the shield, ignoring threats.",
+                    icon = ContentFinder<Texture2D>.Get("UI/Commands/ChangeColor", true),
+                    isActive = () => manualShieldActive,
+                    toggleAction = () =>
+                    {
+                        manualShieldActive = !manualShieldActive;
+                        RefreshShieldCells(); // <-- add this
+                    }
+                };
+            }
         }
+
 
         public override void PostExposeData()
         {
             Scribe_Values.Look(ref shieldActiveTimer, "shieldActiveTimer");
             Scribe_Values.Look(ref shieldColor, "shieldColor", new Color(0.2f, 0.45f, 0.85f, 1f));
             Scribe_Values.Look(ref shieldCooldownTicksRemaining, "shieldCooldownTicksRemaining", 0);
+            Scribe_Values.Look(ref manualOverrideEnabled, "manualOverrideEnabled", false);
+            Scribe_Values.Look(ref manualShieldActive, "manualShieldActive", false);
         }
 
         public override string CompInspectStringExtra()
@@ -547,6 +601,11 @@ namespace RimworldShieldGenerator
             else
             {
                 status = "<color=#00FFAA>Active</color>";
+            }
+
+            if (manualOverrideEnabled)
+            {
+                status += manualShieldActive ? " (Manual ON)" : " (Manual OFF)";
             }
 
             return
