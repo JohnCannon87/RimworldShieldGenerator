@@ -65,7 +65,6 @@ namespace RimworldShieldGenerator
                     Logger.Warning($"[{parent}] No GravEngine detected on spawn.");
                 }
 
-                RefreshShieldCells();
                 Logger.Message("PostSpawnSetup complete.");
             }
             catch (Exception ex)
